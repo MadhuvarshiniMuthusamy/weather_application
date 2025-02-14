@@ -7,25 +7,22 @@ function App() {
 
     const fetchWeather = async () => {
         setError(""); // Clear previous errors
-
-        if (!city) {
-            setError("Please enter a city name.");
-            return;
-        }
+        setWeather(null); // Clear previous weather data
 
         try {
             const response = await fetch(`http://localhost:5000/weather?city=${city}`);
-            const data = await response.json();
 
-            if (data.error) {
-                setError(data.error);
-                setWeather(null);
-            } else {
-                setWeather(data);
+            if (!response.ok) {
+                throw new Error("Failed to fetch weather data. Check API response.");
             }
-        } catch (error) {
-            setError("Failed to fetch weather data.");
-            console.error("Fetch error:", error);
+
+            const data = await response.json();
+            console.log("Weather data received:", data); // Debugging
+
+            setWeather(data);
+        } catch (err) {
+            console.error("Error fetching weather:", err);
+            setError("Could not fetch weather data. Please try again.");
         }
     };
 
@@ -44,10 +41,10 @@ function App() {
 
             {weather && (
                 <div>
-                    <h2>Weather in {weather.name}</h2>
-                    <p>Temperature: {weather.main?.temp ?? "Data not available"}°C</p>
-                    <p>Humidity: {weather.main?.humidity ?? "Data not available"}%</p>
-                    <p>Condition: {weather.weather?.[0]?.description ?? "Data not available"}</p>
+                    <h2>Weather in {weather.location.name}</h2>
+                    <p>Temperature: {weather.current.temp_c}°C</p>
+                    <p>Humidity: {weather.current.humidity}%</p>
+                    <p>Condition: {weather.current.condition.text}</p>
                 </div>
             )}
         </div>
